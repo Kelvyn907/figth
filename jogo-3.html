@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jogo de Luta - Jaczy vs Zyren</title>
+  <style>
+    body { margin: 0; background: black; overflow: hidden; }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: url('https://i.imgur.com/JZdYz2k.png') no-repeat center center;
+      background-size: cover;
+    }
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: Arial;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <div id="hud">Vida Jaczy: <span id="vida1">100</span> | Vida Zyren: <span id="vida2">100</span></div>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let jaczy = { x: 100, y: 300, w: 50, h: 100, color: "#4af", life: 100 };
+    let zyren = { x: 600, y: 300, w: 50, h: 100, color: "#f44", life: 100 };
+    let keys = {};
+    let specialCooldown = false;
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
+    function detectHit(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+    function update() {
+      if (keys["a"]) jaczy.x -= 5;
+      if (keys["d"]) jaczy.x += 5;
+      if (keys["w"]) jaczy.y -= 5;
+      if (keys["s"]) jaczy.y += 5;
+      if (keys["ArrowLeft"]) zyren.x -= 5;
+      if (keys["ArrowRight"]) zyren.x += 5;
+      if (keys["ArrowUp"]) zyren.y -= 5;
+      if (keys["ArrowDown"]) zyren.y += 5;
+      if (keys["j"] && detectHit(jaczy, zyren)) zyren.life -= 1;
+      if (keys["l"] && detectHit(zyren, jaczy)) jaczy.life -= 1;
+      if (keys["k"] && !specialCooldown && detectHit(jaczy, zyren)) {
+        specialCooldown = true;
+        zyren.life -= 10;
+      }
+      jaczy.life = Math.max(0, jaczy.life);
+      zyren.life = Math.max(0, zyren.life);
+      document.getElementById("vida1").innerText = jaczy.life;
+      document.getElementById("vida2").innerText = zyren.life;
+    }
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = jaczy.color;
+      ctx.fillRect(jaczy.x, jaczy.y, jaczy.w, jaczy.h);
+      ctx.fillStyle = zyren.color;
+      ctx.fillRect(zyren.x, zyren.y, zyren.w, zyren.h);
+    }
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
